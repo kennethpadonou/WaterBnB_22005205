@@ -22,7 +22,7 @@ ADMIN=False # Faut etre ADMIN/mongo pour ecrire dans la base
 #client = MongoClient("mongodb+srv://logincfsujet:pwdcfsujet@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
 
 #client = MongoClient("mongodb+srv://visitor:doliprane@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
-client = MongoClient("mongodb+srv://toto:toto@cluster0.ccs6ez9.mongodb.net/")
+client = MongoClient("mongodb+srv://toto:toto@cluster0.ccs6ez9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 #-----------------------------------------------------------------------------
 # Looking for "WaterBnB" database in the cluster
