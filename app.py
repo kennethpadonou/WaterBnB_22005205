@@ -20,7 +20,9 @@ from pymongo import MongoClient
 ADMIN=False # Faut etre ADMIN/mongo pour ecrire dans la base
 #client = MongoClient("mongodb+srv://menez:i.....Q@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
 #client = MongoClient("mongodb+srv://logincfsujet:pwdcfsujet@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
-client = MongoClient("mongodb+srv://visitor:doliprane@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
+
+#client = MongoClient("mongodb+srv://visitor:doliprane@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://toto:toto@cluster0.ccs6ez9.mongodb.net/")
 
 #-----------------------------------------------------------------------------
 # Looking for "WaterBnB" database in the cluster
@@ -30,7 +32,10 @@ dbnames = client.list_database_names()
 if dbname in dbnames: 
     print(f"{dbname} is there!")
 else:
-    print("YOU HAVE to CREATE the db !\n")
+    #print("YOU HAVE to CREATE the db !\n")
+    print("Creating the database...")
+    db = client[dbname]  # Créer la base de données
+    print(f"Database '{dbname}' created!")
 
 db = client.WaterBnB
 
@@ -41,7 +46,10 @@ collnames = db.list_collection_names()
 if collname in collnames: 
     print(f"{collname} is there!")
 else:
-    print(f"YOU HAVE to CREATE the {collname} collection !\n")
+    #print(f"YOU HAVE to CREATE the {collname} collection !\n")
+    print(f"Creating the {collname} collection...")
+    userscollection = db[collname]  # Créer la collection
+    print(f"Collection '{collname}' created!")
     
 userscollection = db.users
 
@@ -71,7 +79,7 @@ app.secret_key = 'BAD_SECRET_KEY'
 #-----------------------------------------------------------------------------
 @app.route('/')
 def hello_world():
-    return render_template('index.html') #'Hello, World!'
+    return render_template('./templates/index.html') #'Hello, World!'
 
 #Test with =>  curl https://waterbnbf.onrender.com/
 
