@@ -97,7 +97,6 @@ if ADMIN :
         #print(ls)
         if userscollection.find_one({"name" : ls[0]}) ==  None :
             userscollection.insert_one({"name": ls[0], "num": ls[1]})
-            print(f"Inserted user with name: {ls[0]} and ID: {inserted_id}")
     count_after_insert = userscollection.estimated_document_count()
     print(f"Total number of records before insertion: {count_before_insert}")
     print(f"Total number of records after insertion: {count_after_insert}")
