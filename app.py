@@ -42,7 +42,32 @@ else:
     print(f"Database '{dbname}' created!")
 
 db = client.WaterBnB
+#-----------------------------------------------------------------------------
+# Looking for "piscine" collection in the WaterBnB database
+# Collection for pools
+pools_collection = db.piscine
 
+#@app.route("/reserve_pool", methods=['POST'])
+def reserve_pool(pool_id, user_id):
+    # Check if the pool exists
+    pool = pools_collection.find_one({'_id': pool_id})
+    if not pool:
+        # If the pool doesn't exist, create it and mark as occupied by the user
+        pool_data = {
+            '_id': pool_id,
+            'occupied': True,
+            'id_user': user_id
+        }
+        pools_collection.insert_one(pool_data)
+        return jsonify({'message': 'Pool created and reserved by user', 'pool_id': pool_id}), 200
+    else:
+        if pool['occupied']:
+            # Cas où la piscine est déjà occupée
+            return jsonify({'error': 'Pool already occupied'}), 400
+        else:
+            # Cas où l'utilisateur réserve la piscine car elle n'est pas occupé
+            pools_collection.update_one({'_id': pool_id}, {'$set': {'occupied': True, 'id_user': user_id}})
+            return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id}), 200
 #-----------------------------------------------------------------------------
 # Looking for "users" collection in the WaterBnB database
 collname= 'users'
@@ -115,6 +140,16 @@ def client():
 def openthedoor():
     idu = request.args.get('idu') # idu : clientid of the service
     idswp = request.args.get('idswp')  #idswp : id of the swimming pool
+    
+    # Vérifier si l'utilisateur est déclaré dans la base de données
+    #if userscollection.find_one({"name": idu}) is None:
+        #return jsonify({'error': 'Utilisateur non autorisé'}), 403
+    
+    # Vérifier si la piscine existe et n'est pas déjà occupée
+    # Appeler la fonction reserve_pool avec les valeurs de pool_id et user_id
+    reserve_pool(idswp, idu)
+    
+    # Si toutes les conditions sont remplies, ouvrir la porte
     session['idu'] = idu
     session['idswp'] = idswp
     print("\n Peer = {}".format(idu))
