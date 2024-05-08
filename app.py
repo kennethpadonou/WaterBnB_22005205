@@ -17,7 +17,7 @@ from pymongo import MongoClient
 # Initialisation :  Mongo DataBase
 
 # Connect to Cluster Mongo : attention aux permissions "network"/MONGO  !!!!!!!!!!!!!!!!
-ADMIN=False # Faut etre ADMIN/mongo pour ecrire dans la base
+ADMIN=True # ADMIN=False Faut etre ADMIN/mongo pour ecrire dans la base
 #client = MongoClient("mongodb+srv://menez:i.....Q@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
 #client = MongoClient("mongodb+srv://logincfsujet:pwdcfsujet@cluster0.x0zyf.mongodb.net/?retryWrites=true&w=majority")
 
@@ -44,6 +44,10 @@ else:
 db = client.WaterBnB
 #-----------------------------------------------------------------------------
 # Looking for "piscine" collection in the WaterBnB database
+collPool= 'piscine'
+collnames = db.list_collection_names()
+if collPool in collnames: 
+    print(f"{collPool} is there!")
 # Collection for pools
 pools_collection = db.piscine
 
@@ -87,12 +91,16 @@ userscollection = db.users
 if ADMIN :
     userscollection.delete_many({})  # empty collection
     excel = csv.reader(open("usersM1_2024.csv")) # list of authorized users
+    count_before_insert = userscollection.estimated_document_count()
     for l in excel : #import in mongodb
         ls = (l[0].split(';'))
         #print(ls)
         if userscollection.find_one({"name" : ls[0]}) ==  None :
             userscollection.insert_one({"name": ls[0], "num": ls[1]})
-    
+            print(f"Inserted user with name: {ls[0]} and ID: {inserted_id}")
+    count_after_insert = userscollection.estimated_document_count()
+    print(f"Total number of records before insertion: {count_before_insert}")
+    print(f"Total number of records after insertion: {count_after_insert}")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Initialisation :  Flask service
