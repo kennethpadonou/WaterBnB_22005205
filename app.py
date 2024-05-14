@@ -63,15 +63,26 @@ def reserve_pool(pool_id, user_id):
             'id_user': user_id
         }
         pools_collection.insert_one(pool_data)
+        is_occupied = True
+        led_strip = "Jaune"
+        message = {'occupied': is_occupied, 'led_strip': led_strip}
         return jsonify({'message': 'Pool created and reserved by user', 'pool_id': pool_id}), 200
     else:
         if pool['occupied']:
             # Cas où la piscine est déjà occupée
+            is_occupied = True
+            led_strip = "Rouge"
             return jsonify({'error': 'Pool already occupied'}), 400
         else:
             # Cas où l'utilisateur réserve la piscine car elle n'est pas occupé
             pools_collection.update_one({'_id': pool_id}, {'$set': {'occupied': True, 'id_user': user_id}})
+            is_occupied = False
+            led_strip = "jaune" #"Vert"
             return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id}), 200
+        message = {'occupied': is_occupied, 'led_strip': led_strip}
+    # Publish the message to the user's topic    
+    topic = "uca/iot/piscine/" + pool_id
+    mqtt_client.publish(topic, json.dumps(message))
 #-----------------------------------------------------------------------------
 # Looking for "users" collection in the WaterBnB database
 collname= 'users'
@@ -154,7 +165,7 @@ def openthedoor():
     
     # Vérifier si la piscine existe et n'est pas déjà occupée
     # Appeler la fonction reserve_pool avec les valeurs de pool_id et user_id
-    reserve_pool(idswp, idu)
+    
     
     # Si toutes les conditions sont remplies, ouvrir la porte
     session['idu'] = idu
@@ -166,6 +177,7 @@ def openthedoor():
 
     if userscollection.find_one({"name" : idu}) !=  None:
         granted = "YES"
+        reserve_pool(idswp, idu)
     else:
         granted = "NO"
     return  jsonify({'idu' : session['idu'], 'idswp' : session['idswp'], "granted" : granted}), 200
