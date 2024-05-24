@@ -161,6 +161,14 @@ def openthedoor():
     idu = request.args.get('idu') # idu : clientid of the service
     idswp = request.args.get('idswp')  #idswp : id of the swimming pool
     
+    # Vérifier si l'utilisateur est déclaré dans la base de données
+    #if userscollection.find_one({"name": idu}) is None:
+        #return jsonify({'error': 'Utilisateur non autorisé'}), 403
+    
+    # Vérifier si la piscine existe et n'est pas déjà occupée
+    # Appeler la fonction reserve_pool avec les valeurs de pool_id et user_id
+    
+    
     # Si toutes les conditions sont remplies, ouvrir la porte
     session['idu'] = idu
     session['idswp'] = idswp
@@ -206,6 +214,9 @@ def publish_message():
 # Initialisation MQTT
 app.config['MQTT_BROKER_URL'] =  "test.mosquitto.org"
 app.config['MQTT_BROKER_PORT'] = 1883
+#app.config['MQTT_USERNAME'] = ''  # Set this item when you need to verify username and password
+#app.config['MQTT_PASSWORD'] = ''  # Set this item when you need to verify username and password
+#app.config['MQTT_KEEPALIVE'] = 5  # Set KeepAlive time in seconds
 app.config['MQTT_TLS_ENABLED'] = False  # If your broker supports TLS, set it True
 
 topicname = "uca/iot/piscine"
@@ -223,39 +234,24 @@ def handle_connect(client, userdata, flags, rc):
 @mqtt_client.on_message()
 def handle_mqtt_message(client, userdata, msg):
     global topicname
+    
     data = dict(
         topic=msg.topic,
         payload=msg.payload.decode()
     )
+    #    print('Received message on topic: {topic} with payload: {payload}'.format(**data))
     print("\n msg.topic = {}".format(msg.topic))
     print("\n topicname = {}".format(topicname))
     
-    if msg.topic == topicname:
-        decoded_message = str(msg.payload.decode("utf-8"))
-        dic = json.loads(decoded_message)
-        print("\n Dictionnary received = {}".format(dic))
+    if (msg.topic == topicname) : # cf https://stackoverflow.com/questions/63580034/paho-updating-userdata-from-on-message-callback
+        decoded_message =str(msg.payload.decode("utf-8"))
+        #print("\ndecoded message received = {}".format(decoded_message))
+        dic =json.loads(decoded_message) # from string to dict
+        print("\n Dictionnary  received = {}".format(dic))
 
-        who = dic["info"]["ident"]
-        pool = pools_collection.find_one({'_id': who})
-        if pool:
-            light_status = dic["status"]["light"]
-            if light_status > 300 and pool.get('occupied', False):
-                pools_collection.update_one({'_id': who}, {'$set': {'occupied': False}})
-                print(f"Updated pool {who}: set occupied to False due to light level {light_status}")
+        who = dic["info"]["ident"] # Qui a publié ?
+        t = dic["status"]["temperature"] # Quelle température ?
 
-                # Envoi du message MQTT
-                topic = "uca/iot/piscine/" + who
-                current_time = datetime.datetime.now()
-                message = {
-                    'occupied': False,
-                    'led_strip': "vert",
-                    'time': current_time.isoformat()
-                }
-                mqtt_client.publish(topic, json.dumps(message))
-                print(f"Published message to topic {topic}: {message}")
-            else:
-                print(f"Pool {who} is not occupied or light level is below threshold")
-                
 
 #%%%%%%%%%%%%%  main driver function
 if __name__ == '__main__':
