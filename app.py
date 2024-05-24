@@ -169,7 +169,7 @@ def openthedoor():
     # ip addresses of the machine asking for opening
     ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
 
-    if userscollection.find_one({"name" : idu}) !=  None:
+    if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
         reserve_pool(idswp, idu)
     else:
