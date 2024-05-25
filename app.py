@@ -182,24 +182,25 @@ def openthedoor():
 
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
-        #reserve_pool(idswp, idu)
+        reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
-        reserve_response, status_code = reserve_pool(idswp, idu)
-        reserve_data = reserve_response[0].get_json()
-        status_code = reserve_response[1]
+        #reserve_response, status_code = reserve_pool(idswp, idu)
+        #reserve_data = reserve_response[0].get_json()
+        #status_code = reserve_response[1]
     else:
         granted = "NO"
         #reserve_response, status_code = {}, 200
-        reserve_data = {}
-        status_code = 200
+        #reserve_data = {}
+        #status_code = 200
         
     response = {
         'idu': session['idu'],
         'idswp': session['idswp'],
         'granted': granted,
-        'reserve_response': reserve_data
+        #'reserve_response': reserve_data
     }
-    return  jsonify(response), status_code
+    return  jsonify(response), 200
+    #return  jsonify({'idu' : session['idu'], 'idswp' : session['idswp'], "granted" : granted}), 200
 
 # Test with => curl -X POST https://waterbnbf.onrender.com/open?who=gillou
 # Test with => curl https://waterbnbf.onrender.com/open?who=gillou
