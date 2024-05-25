@@ -72,7 +72,7 @@ def reserve_pool(pool_id, user_id):
         is_occupied = True
         led_strip = "Jaune"
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
-        return jsonify({'message': 'Pool created and reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
+        #return jsonify({'message': 'Pool created and reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
     else:
         print(f"Pool {pool_id} found: {pool}")
         if pool['occupied'] == True:
@@ -80,7 +80,7 @@ def reserve_pool(pool_id, user_id):
             print(f"Pool {pool_id} is already occupied.")
             is_occupied = True
             led_strip = "Rouge"
-            return jsonify({'error': 'Pool already occupied'}), 400
+            #return jsonify({'error': 'Pool already occupied'}), 400
         else:
             # Case where the user reserves the pool as it is not occupied
             print(f"Pool {pool_id} is not occupied. Reserving the pool for user {user_id}.")
@@ -90,13 +90,14 @@ def reserve_pool(pool_id, user_id):
             print(f"Pool {pool_id} state after update: occupied = {updated_pool['occupied']}")
             is_occupied = False
             led_strip = "Jaune"
-            return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
+            #return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
 
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
     print(f"Publishing message to topic {topic}: {message}")
     mqtt_client.publish(topic, json.dumps(message))
+    return jsonify({'message': 'okkk'}), 200
 #-----------------------------------------------------------------------------
 # Looking for "users" collection in the WaterBnB database
 collname= 'users'
