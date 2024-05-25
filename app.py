@@ -201,11 +201,14 @@ def openthedoor():
     # ip addresses of the machine asking for opening
     ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
 
+    mqttClient = Mqtt(app)
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
         topic = "uca/iot/piscine/P_22005205"
         message = "AA"
         mqtt_client.publish(topic, message)
+        mqttClient.publish(topic, '{"piscine":{"occuped":true, "access":"denied"}, "info": {"ident": "' + idswp + '"}}', qos=2)
+
         reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
