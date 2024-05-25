@@ -57,30 +57,41 @@ def reserve_pool(pool_id, user_id):
     # Check if the pool exists
     pool = pools_collection.find_one({'_id': pool_id})
     current_time = datetime.datetime.now()
+
     if not pool:
         # If the pool doesn't exist, create it and mark as occupied by the user
+        print(f"Pool {pool_id} does not exist. Creating a new pool and reserving it.")
         pool_data = {
             '_id': pool_id,
             'occupied': True,
-            'id_user': user_id
+            'id_user': user_id,
+            'time': current_time
         }
         pools_collection.insert_one(pool_data)
+        print(f"Pool {pool_id} created and reserved by user {user_id}.")
         is_occupied = True
         led_strip = "Jaune"
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
         return jsonify({'message': 'Pool created and reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
     else:
+        print(f"Pool {pool_id} found: {pool}")
         if pool['occupied'] == True:
-            # Cas où la piscine est déjà occupée
+            # Case where the pool is already occupied
+            print(f"Pool {pool_id} is already occupied.")
             is_occupied = True
             led_strip = "Rouge"
             return jsonify({'error': 'Pool already occupied'}), 400
         else:
-            # Cas où l'utilisateur réserve la piscine car elle n'est pas occupé
+            # Case where the user reserves the pool as it is not occupied
+            print(f"Pool {pool_id} is not occupied. Reserving the pool for user {user_id}.")
+            print(f"Pool {pool_id} state before update: occupied = {pool['occupied']}")
             pools_collection.update_one({'_id': pool_id}, {'$set': {'occupied': True, 'id_user': user_id, 'time': current_time}})
+            updated_pool = pools_collection.find_one({'_id': pool_id})
+            print(f"Pool {pool_id} state after update: occupied = {updated_pool['occupied']}")
             is_occupied = False
-            led_strip = "jaune" #"Vert"
+            led_strip = "Jaune"
             return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
+
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
@@ -171,10 +182,19 @@ def openthedoor():
 
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
-        reserve_pool(idswp, idu)
+        #reserve_pool(idswp, idu)
+        reserve_response, status_code = reserve_pool(idswp, idu)
     else:
         granted = "NO"
-    return  jsonify({'idu' : session['idu'], 'idswp' : session['idswp'], "granted" : granted}), 200
+        reserve_response, status_code = {}, 200
+        
+    response = {
+        'idu': session['idu'],
+        'idswp': session['idswp'],
+        'granted': granted,
+        'reserve_response': reserve_response
+    }
+    return  jsonify(response), status_code
 
 # Test with => curl -X POST https://waterbnbf.onrender.com/open?who=gillou
 # Test with => curl https://waterbnbf.onrender.com/open?who=gillou
