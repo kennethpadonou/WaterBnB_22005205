@@ -120,7 +120,7 @@ def reserve_pool(pool_id, user_id):
     clientMQTT.connect(broker_address, broker_port)
 
     # Publication du message sur le topic spécifié
-    clientMQTT.publish(topic, message)
+    clientMQTT.publish(topic, json.dumps(message))
 
     # Déconnexion du broker MQTT
     clientMQTT.disconnect()
