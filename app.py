@@ -183,16 +183,21 @@ def openthedoor():
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
         #reserve_pool(idswp, idu)
-        reserve_response, status_code = reserve_pool(idswp, idu)
+        #reserve_response, status_code = reserve_pool(idswp, idu)
+        reserve_response = reserve_pool(idswp, idu)
+        reserve_data = reserve_response.get_json()
+        status_code = reserve_response.status_code
     else:
         granted = "NO"
-        reserve_response, status_code = {}, 200
+        #reserve_response, status_code = {}, 200
+        reserve_data = {}
+        status_code = 200
         
     response = {
         'idu': session['idu'],
         'idswp': session['idswp'],
         'granted': granted,
-        'reserve_response': reserve_response
+        'reserve_response': reserve_data
     }
     return  jsonify(response), status_code
 
