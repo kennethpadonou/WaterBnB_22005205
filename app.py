@@ -227,17 +227,19 @@ def handle_mqtt_message(client, userdata, msg):
         topic=msg.topic,
         payload=msg.payload.decode()
     )
-    print("\n msg.topic = {}".format(msg.topic))
-    print("\n topicname = {}".format(topicname))
+    #print("\n msg.topic = {}".format(msg.topic))
+    #print("\n topicname = {}".format(topicname))
     
     if msg.topic == topicname:
         decoded_message = str(msg.payload.decode("utf-8"))
         dic = json.loads(decoded_message)
-        print("\n Dictionnary received = {}".format(dic))
+        #print("\n Dictionnary received = {}".format(dic))
 
         who = dic["info"]["ident"]
         pool = pools_collection.find_one({'_id': who})
         if pool:
+            print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
+            
             light_status = dic["status"]["light"]
             if light_status > 300 and pool.get('occupied', False):
                 pools_collection.update_one({'_id': who}, {'$set': {'occupied': False}})
@@ -254,7 +256,7 @@ def handle_mqtt_message(client, userdata, msg):
                 mqtt_client.publish(topic, json.dumps(message))
                 print(f"Published message to topic {topic}: {message}")
             else:
-                print(f"Pool {who} is not occupied or light level is below threshold")
+                print(f"Pool {who} is not occupied or light level is below threshold, light = {light_status}")
                 
 
 #%%%%%%%%%%%%%  main driver function
