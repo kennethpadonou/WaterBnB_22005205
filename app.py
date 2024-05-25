@@ -287,43 +287,46 @@ def handle_mqtt_message(client, userdata, msg):
     print("\n topicname = {}".format(topicname))
     
     if msg.topic == topicname:
-        decoded_message = str(msg.payload.decode("utf-8"))
-        if not decoded_message:
-            print("Received an empty message, skipping JSON decoding.")
-            return
-
         try:
-            dic = json.loads(decoded_message)
-        except json.JSONDecodeError as e:
-            print(f"Failed to decode JSON: {e}")
-            return
+            decoded_message = str(msg.payload.decode("utf-8"))
+            if not decoded_message:
+                print("Received an empty message, skipping JSON decoding.")
+                return
 
-        #print("\n Dictionary received = {}".format(dic))
+            try:
+                dic = json.loads(decoded_message)
+            except json.JSONDecodeError as e:
+                print(f"Failed to decode JSON: {e}")
+                return
 
-        who = dic["info"]["ident"]
-        pool = pools_collection.find_one({'_id': who})
-        if pool:
-            print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
-            
-            light_status = dic["status"]["light"]
-            if light_status > 300 and pool.get('occupied', False):
-                pools_collection.update_one({'_id': who}, {'$set': {'occupied': False}})
-                print(f"Updated pool {who}: set occupied to False due to light level {light_status}")
+            #print("\n Dictionary received = {}".format(dic))
 
-                # Envoi du message MQTT
-                topic = "uca/iot/piscine/" + who
-                current_time = datetime.datetime.now()
-                message = {
-                    'occupied': False,
-                    'led_strip': "vert",
-                    'time': current_time.isoformat()
-                }
-                mqtt_client.publish(topic, json.dumps(message))
-                print(f"Published message to topic {topic}: {message}")
+            who = dic["info"]["ident"]
+            pool = pools_collection.find_one({'_id': who})
+            if pool:
+                print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
+                
+                light_status = dic["status"]["light"]
+                if light_status > 300 and pool.get('occupied', False):
+                    pools_collection.update_one({'_id': who}, {'$set': {'occupied': False}})
+                    print(f"Updated pool {who}: set occupied to False due to light level {light_status}")
+
+                    # Envoi du message MQTT
+                    topic = "uca/iot/piscine/" + who
+                    current_time = datetime.datetime.now()
+                    message = {
+                        'occupied': False,
+                        'led_strip': "vert",
+                        'time': current_time.isoformat()
+                    }
+                    mqtt_client.publish(topic, json.dumps(message))
+                    print(f"Published message to topic {topic}: {message}")
+                else:
+                    print(f"Pool {who} is not occupied or light level is below threshold, light = {light_status}")
             else:
-                print(f"Pool {who} is not occupied or light level is below threshold, light = {light_status}")
-        else:
-            print(f"No pool found with id {who}")
+                print(f"No pool found with id {who}")
+        except Exception as e:
+          print("Error while handling the message: " + str(e))
 
 def publish_to_pool_topic(topic,message):
     """
