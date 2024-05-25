@@ -57,7 +57,7 @@ def reserve_pool(pool_id, user_id):
     # Check if the pool exists
     pool = pools_collection.find_one({'_id': pool_id})
     current_time = datetime.datetime.now()
-
+    current_timeString = datetime.datetime.now().isoformat()
     if not pool:
         # If the pool doesn't exist, create it and mark as occupied by the user
         print(f"Pool {pool_id} does not exist. Creating a new pool and reserving it.")
@@ -92,7 +92,7 @@ def reserve_pool(pool_id, user_id):
             led_strip = "Jaune"
             #return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
 
-        message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
+        message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
     print(f"Publishing message to topic {topic}: {message}")
