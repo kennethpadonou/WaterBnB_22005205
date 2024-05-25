@@ -102,8 +102,7 @@ def reserve_pool(pool_id, user_id):
         'led_strip': led_strip,
         'time': current_time.isoformat()
     }
-    mqtt_client.publish(topic, "za")
-    mqtt_client.publish(topic, json.dumps(message))
+    publish_to_pool_topic(topic,message)
     print(f"Publishing message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
@@ -111,16 +110,7 @@ def reserve_pool(pool_id, user_id):
 
 
 
-def publish_to_pool_topic(message):
-    """
-    Publishes a message to the topic uca/iot/piscine/P_22005205.
-    
-    Args:
-    - message (dict): The message to publish.
-    """
-    topic = "uca/iot/piscine/P_22005205"
-    mqtt_client.publish(topic, json.dumps(message))
-    print(f"Published message to topic {topic}: {message}")
+
 
 
 #-----------------------------------------------------------------------------
@@ -322,6 +312,22 @@ def handle_mqtt_message(client, userdata, msg):
         else:
             print(f"No pool found with id {who}")
 
+def publish_to_pool_topic(topic,message):
+    """
+    Publishes a message to the topic uca/iot/piscine/P_22005205.
+    
+    Args:
+    - message (dict): The message to publish.
+    """
+    #topic = "uca/iot/piscine/P_22005205"
+    result = mqtt_client.publish(topic, json.dumps(message))
+    # result: [0, 1]
+    status = result[0]
+    if status == 0:
+        print(f"Send `{message}` to topic `{topic}`")
+    else:
+        print(f"Failed to send message to topic {topic}")
+    print(f"Published message to topic {topic}: {message}")
 
 #%%%%%%%%%%%%%  main driver function
 if __name__ == '__main__':
