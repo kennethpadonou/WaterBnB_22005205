@@ -227,8 +227,8 @@ def handle_mqtt_message(client, userdata, msg):
         topic=msg.topic,
         payload=msg.payload.decode()
     )
-    #print("\n msg.topic = {}".format(msg.topic))
-    #print("\n topicname = {}".format(topicname))
+    print("\n msg.topic = {}".format(msg.topic))
+    print("\n topicname = {}".format(topicname))
     
     if msg.topic == topicname:
         decoded_message = str(msg.payload.decode("utf-8"))
