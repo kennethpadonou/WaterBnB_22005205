@@ -22,7 +22,7 @@ broker_address = "test.mosquitto.org"
 broker_port = 1883
 
 # Configuration du client MQTT
-client = mqtt.Client()
+clientMQTT = mqtt.Client()
 
 
 
@@ -117,13 +117,13 @@ def reserve_pool(pool_id, user_id):
     }
     #publish_to_pool_topic(topic,message)
     # Connexion au broker MQTT
-    client.connect(broker_address, broker_port)
+    clientMQTT.connect(broker_address, broker_port)
 
     # Publication du message sur le topic spécifié
-    client.publish(topic, message)
+    clientMQTT.publish(topic, message)
 
     # Déconnexion du broker MQTT
-    client.disconnect()
+    clientMQTT.disconnect()
     print(f"Publishing message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
