@@ -95,6 +95,7 @@ def reserve_pool(pool_id, user_id):
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
+    print(f"Publishing message to topic {topic}: {message}")
     mqtt_client.publish(topic, json.dumps(message))
 #-----------------------------------------------------------------------------
 # Looking for "users" collection in the WaterBnB database
