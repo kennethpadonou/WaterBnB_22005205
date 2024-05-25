@@ -102,6 +102,7 @@ def reserve_pool(pool_id, user_id):
         'led_strip': led_strip,
         'time': current_time.isoformat()
     }
+    mqtt_client.publish(topic, "za")
     mqtt_client.publish(topic, json.dumps(message))
     print(f"Publishing message to topic {topic}: {message}")
     
