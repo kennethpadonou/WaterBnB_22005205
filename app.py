@@ -98,7 +98,7 @@ def reserve_pool(pool_id, user_id):
     print(f"Publishing message to topic {topic}: {message}")
     mqtt_client.publish(topic, json.dumps(message))
     
-    message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_time}
+    message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
     topic = f"uca/iot/piscine/{pool_id}"
     print(f"Publishing message to topic {topic}: {message}")
     result = mqtt_client.publish(topic, json.dumps(message))
