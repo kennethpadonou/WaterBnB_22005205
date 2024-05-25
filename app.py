@@ -184,9 +184,9 @@ def openthedoor():
         granted = "YES"
         #reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
-        reserve_response = reserve_pool(idswp, idu)
-        reserve_data = reserve_response.get_json()
-        status_code = reserve_response.status_code
+        reserve_response, status_code = reserve_pool(idswp, idu)
+        reserve_data = reserve_response[0].get_json()
+        status_code = reserve_response[1]
     else:
         granted = "NO"
         #reserve_response, status_code = {}, 200
