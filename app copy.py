@@ -95,15 +95,18 @@ def reserve_pool(pool_id, user_id):
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
-    
-    current_time = datetime.datetime.now()
-    message = {
-        'occupied': False,
-        'led_strip': led_strip,
-        'time': current_time.isoformat()
-    }
-    mqtt_client.publish(topic, json.dumps(message))
     print(f"Publishing message to topic {topic}: {message}")
+    mqtt_client.publish(topic, json.dumps(message))
+    
+    message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
+    topic = f"uca/iot/piscine/{pool_id}"
+    print(f"Publishing message to topic {topic}: {message}")
+    result = mqtt_client.publish(topic, json.dumps(message))
+    if result[0] == 0:
+        print(f"Message published successfully to {topic}")
+    else:
+        print(f"Failed to publish message to {topic}")
+    
     
     return jsonify({'message': 'okkk'}), 200
 
