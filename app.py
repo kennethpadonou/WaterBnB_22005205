@@ -232,14 +232,22 @@ def handle_mqtt_message(client, userdata, msg):
     
     if msg.topic == topicname:
         decoded_message = str(msg.payload.decode("utf-8"))
-        dic = json.loads(decoded_message)
-        #print("\n Dictionnary received = {}".format(dic))
+        if not decoded_message:
+            print("Received an empty message, skipping JSON decoding.")
+            return
+
+        try:
+            dic = json.loads(decoded_message)
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON: {e}")
+            return
+
+        #print("\n Dictionary received = {}".format(dic))
 
         who = dic["info"]["ident"]
         pool = pools_collection.find_one({'_id': who})
         if pool:
-            print(f"Pool find in database: {pool}")
-            #print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
+            print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
             
             light_status = dic["status"]["light"]
             if light_status > 300 and pool.get('occupied', False):
@@ -258,7 +266,9 @@ def handle_mqtt_message(client, userdata, msg):
                 print(f"Published message to topic {topic}: {message}")
             else:
                 print(f"Pool {who} is not occupied or light level is below threshold, light = {light_status}")
-                
+        else:
+            print(f"No pool found with id {who}")
+
 
 #%%%%%%%%%%%%%  main driver function
 if __name__ == '__main__':
