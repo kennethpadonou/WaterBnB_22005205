@@ -238,7 +238,8 @@ def handle_mqtt_message(client, userdata, msg):
         who = dic["info"]["ident"]
         pool = pools_collection.find_one({'_id': who})
         if pool:
-            print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
+            print(f"Pool find in database: {pool}")
+            #print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
             
             light_status = dic["status"]["light"]
             if light_status > 300 and pool.get('occupied', False):
