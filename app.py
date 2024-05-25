@@ -326,7 +326,7 @@ def handle_mqtt_message(client, userdata, msg):
             else:
                 print(f"No pool found with id {who}")
         except Exception as e:
-          print("Error while handling the message: " + str(e))
+          print("Erreur au niveau de : " + str(e))
 
 def publish_to_pool_topic(topic,message):
     """
