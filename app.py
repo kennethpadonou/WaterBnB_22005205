@@ -203,6 +203,9 @@ def openthedoor():
 
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
+        topic = "uca/iot/piscine/P_22005205"
+        message = "AA"
+        mqtt_client.publish(topic, message)
         reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
