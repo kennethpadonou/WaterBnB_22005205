@@ -202,6 +202,9 @@ def openthedoor():
     ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
 
     mqttClient = Mqtt(app)
+    topic = "uca/iot/piscine/P_22005205"
+    message = "AA"
+    mqttClient.publish(topic, '{"piscine":{"occuped":true, "access":"denied"}, "info": {"ident": "' + idswp + '"}}', qos=2)
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
         topic = "uca/iot/piscine/P_22005205"
