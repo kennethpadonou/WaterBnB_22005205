@@ -14,6 +14,19 @@ from flask_mqtt import Mqtt
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
+
+import paho.mqtt.client as mqtt
+
+# Configuration du broker MQTT
+broker_address = "test.mosquitto.org"
+broker_port = 1883
+
+# Configuration du client MQTT
+client = mqtt.Client()
+
+
+
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Initialisation :  Mongo DataBase
 
@@ -102,7 +115,15 @@ def reserve_pool(pool_id, user_id):
         'led_strip': led_strip,
         'time': current_time.isoformat()
     }
-    publish_to_pool_topic(topic,message)
+    #publish_to_pool_topic(topic,message)
+    # Connexion au broker MQTT
+    client.connect(broker_address, broker_port)
+
+    # Publication du message sur le topic spécifié
+    client.publish(topic, message)
+
+    # Déconnexion du broker MQTT
+    client.disconnect()
     print(f"Publishing message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
