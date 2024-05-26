@@ -7,8 +7,13 @@
       "properties": {
         "temperature": { "type": "number" },
         "light": { "type": "number" },
-        "regul": { "type": "string", "enum": ["RUNNING", "STOPPED"] },
-        "fire": { "type": "string", "enum": ["DETECTED", "NOT DETECTED"] },
+        "regul": { "type": "string", "enum": ["RUNNING", "STOPPED", "HALT"] },
+        "fire": {
+          "oneOf": [
+            {"type": "string", "enum": ["DETECTED", "NOT DETECTED"]},
+            {"type": "boolean"}
+          ]
+        },
         "heat": { "type": "string", "enum": ["ON", "OFF"] },
         "cold": { "type": "string", "enum": ["ON", "OFF"] },
         "fanspeed": { "type": "number", "minimum": 0 }
