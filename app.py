@@ -273,20 +273,11 @@ def client():
 #If a request goes through multiple proxies, the IP addresses of each successive proxy is listed.
 # voir aussi le parsing !
 
-app.config['MQTT_BROKER_URL'] =  "test.mosquitto.org"
-app.config['MQTT_BROKER_PORT'] = 1883
-app.config['MQTT_TLS_ENABLED'] = False  # If your broker supports TLS, set it True
 
-topicname = "uca/iot/piscine"
-topicname2 = "uca/iot/piscine/P_22005205"
-mqtt_client = Mqtt(app)
 
 @app.route("/open", methods= ['GET', 'POST'])
 @mqtt_client.on_connect()
 def openthedoor():
-    print("here")
-    mqtt_client.publish(topicname2, "Hello from Flask") # publish message
-    print("Published message to topic {topicname2}: Hello from Flask")
     idu = request.args.get('idu') # idu : clientid of the service
     idswp = request.args.get('idswp')  #idswp : id of the swimming pool
     
@@ -300,9 +291,6 @@ def openthedoor():
 
     if userscollection.find_one({"num" : idu}) !=  None:
         granted = "YES"
-        topic = "uca/iot/piscine/P_22005205"
-        message = "AA"
-        mqtt_client.publish(topic, message)
         reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
         #reserve_response, status_code = reserve_pool(idswp, idu)
