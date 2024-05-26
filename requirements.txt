@@ -2,3 +2,9 @@ Flask
 Gunicorn
 flask-mqtt
 flask-pymongo
+flask_mqtt
+flask_pymongo
+pymongo
+paho-mqtt
+jsonschema
+
