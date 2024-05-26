@@ -410,6 +410,7 @@ def handle_mqtt_message(client, userdata, msg):
 
             try:
                 validate(instance=dic, schema=schema)
+                print("JSON correct")
             except ValidationError as e:
                 print(f"Invalid JSON data: {e}")
                 return
