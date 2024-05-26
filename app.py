@@ -144,7 +144,7 @@ pools_collection = db.piscine
 
 #@app.route("/reserve_pool", methods=['POST'])
 def reserve_pool(pool_id, user_id):
-    publish_to_pool_topic("uca/iot/piscine/P_22005205", "Hello from Flask")
+    #publish_to_pool_topic("uca/iot/piscine/P_22005205", "Hello from Flask")
     
     
     # Check if the pool exists
@@ -190,7 +190,9 @@ def reserve_pool(pool_id, user_id):
     update_pool_state(pool_id, user_id, is_occupied)
     # Publish the message to the user's topic 
     # Envoi du message MQTT
-    publish_to_pool_topic("uca/iot/piscine/P_22005205", "Hello from Flask")
+    publish_to_pool_topic("uca/iot/piscine/P_22005205", is_occupied,led_strip)
+    publish_to_pool_topic("uca/iot/piscine/P_22005205", is_occupied,led_strip)
+    publish_to_pool_topic("uca/iot/piscine/P_22005205", is_occupied,led_strip)
     print(f"Published message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
@@ -440,7 +442,7 @@ def handle_mqtt_message(client, userdata, msg):
         except Exception as e:
           print("Erreur au niveau de : " + str(e))
 
-def publish_to_pool_topic(topic,message):
+def publish_to_pool_topic(topic,occupied,color):
     app = Flask(__name__)
     app.secret_key = 'BAD_SECRET_KEY'
     app.config['MQTT_BROKER_URL'] = "test.mosquitto.org"
@@ -451,7 +453,7 @@ def publish_to_pool_topic(topic,message):
     mqtt_client = Mqtt(app)
     qos = 0
     update_color_topic = f"{topicname}/{my_ident}"
-    result = mqtt_client.publish(update_color_topic, json.dumps({"info": {"ident": my_ident}, "led_strip": "jaune"}).encode("utf-8"),
+    result = mqtt_client.publish(update_color_topic, json.dumps({"occupied": occupied, "led_strip": color}).encode("utf-8"),
                             qos=qos)
     status = result[0]
     if status == 0:

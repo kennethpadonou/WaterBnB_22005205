@@ -14,8 +14,8 @@
             {"type": "boolean"}
           ]
         },
-        "heat": { "type": "string", "enum": ["ON", "OFF"] },
-        "cold": { "type": "string", "enum": ["ON", "OFF"] },
+        "heat": { "type": ["boolean", "string"], "enum": ["ON", "OFF"] },
+        "cold": { "type": ["boolean", "string"], "enum": ["ON", "OFF"] },
         "fanspeed": { "type": "number", "minimum": 0 }
       },
       "required": ["temperature", "light", "regul", "fire", "heat", "cold", "fanspeed"]
@@ -71,7 +71,15 @@
         "sp": { "type": "number", "minimum": 1 }
       },
       "required": ["target_ip", "target_port", "sp"]
+    },
+    "piscine": {
+      "type": "object",
+      "properties": {
+        "hotspot": { "type": "boolean" },
+        "occuped": { "type": "boolean" }
+      },
+      "required": ["hotspot", "occuped"]
     }
   },
-  "required": ["status", "location", "regul", "info", "net", "reporthost"]
+  "required": ["status", "location", "regul", "info", "net", "reporthost", "piscine"]
 }
