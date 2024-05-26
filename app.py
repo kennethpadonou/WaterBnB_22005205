@@ -144,13 +144,7 @@ pools_collection = db.piscine
 
 #@app.route("/reserve_pool", methods=['POST'])
 def reserve_pool(pool_id, user_id):
-    app = Flask(__name__) #app = Flask(name)
-    app.secret_key = 'BAD_SECRET_KEY'
-    app.config['MQTT_BROKER_URL'] = "test.mosquitto.org"
-    app.config['MQTT_BROKER_PORT'] = 1883
-    app.config['MQTT_TLS_ENABLED'] = False
-    mqtt_client = Mqtt(app)
-    qos = 0
+    publish_to_pool_topic("uca/iot/piscine/P_22005205", "Hello from Flask")
     
     
     # Check if the pool exists
@@ -194,12 +188,9 @@ def reserve_pool(pool_id, user_id):
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
         
     update_pool_state(pool_id, user_id, is_occupied)
-    # Publish the message to the user's topic    
-    topic = "uca/iot/piscine/" + pool_id
+    # Publish the message to the user's topic 
     # Envoi du message MQTT
-    topic = "uca/iot/piscine/P_22005205"
-    mqtt_client.publish(topic, json.dumps(message).encode("utf-8"),
-                            qos=qos)
+    publish_to_pool_topic("uca/iot/piscine/P_22005205", "Hello from Flask")
     print(f"Published message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
@@ -370,12 +361,6 @@ def handle_connect(client, userdata, flags, rc):
    if rc == 0:
        print('Connected successfully')
        mqtt_client.subscribe(topicname) # subscribe topic
-       mqttClient = Mqtt(app)
-       topic = "uca/iot/piscine/P_22005205"
-       message = "AAZZZZA"
-       mqttClient.publish(topic, '{"piscine":{"occuped":true, "access":"denied"}, "info": {"ident": "aa"}}', qos=2)
-    
-       
    else:
        print('Bad connection. Code:', rc)
 
@@ -456,15 +441,18 @@ def handle_mqtt_message(client, userdata, msg):
           print("Erreur au niveau de : " + str(e))
 
 def publish_to_pool_topic(topic,message):
-    """
-    Publishes a message to the topic uca/iot/piscine/P_22005205.
-    
-    Args:
-    - message (dict): The message to publish.
-    """
-    #topic = "uca/iot/piscine/P_22005205"
-    result = mqtt_client.publish(topic, json.dumps(message))
-    # result: [0, 1]
+    app = Flask(__name__)
+    app.secret_key = 'BAD_SECRET_KEY'
+    app.config['MQTT_BROKER_URL'] = "test.mosquitto.org"
+    app.config['MQTT_BROKER_PORT'] = 1883
+    app.config['MQTT_TLS_ENABLED'] = False
+    topicname = "uca/iot/piscine"
+    my_ident = "P_22005205"
+    mqtt_client = Mqtt(app)
+    qos = 0
+    update_color_topic = f"{topicname}/{my_ident}"
+    result = mqtt_client.publish(update_color_topic, json.dumps({"info": {"ident": my_ident}, "led_strip": "jaune"}).encode("utf-8"),
+                            qos=qos)
     status = result[0]
     if status == 0:
         print(f"Send `{message}` to topic `{topic}`")
