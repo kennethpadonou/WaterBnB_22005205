@@ -14,6 +14,7 @@ from flask_mqtt import Mqtt
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
+from jsonschema import validate, ValidationError
 
 # python 3.11
 
@@ -103,6 +104,35 @@ else:
     print(f"Database '{dbname}' created!")
 
 db = client.WaterBnB
+
+
+# Collection for pool state
+pool_state_collection = db.pool_state
+
+def save_pool_state(pool_id, user_id, user_name, state):
+    current_time = datetime.datetime.now()
+    state_data = {
+        'pool_id': pool_id,
+        'user_id': user_id,
+        'user_name': user_name,
+        'state': state,
+        'datetime': current_time
+    }
+    pool_state_collection.insert_one(state_data)
+    
+    
+def update_pool_state(pool_id, user_id, is_occupied): #def update_pool_state(pool_id, user_id, user_name, is_occupied):
+    current_time = datetime.datetime.now()
+    pool_state_data = {
+        'pool_id': pool_id,
+        'user_id': user_id,
+        #'user_name': user_name,
+        'is_occupied': is_occupied,
+        'datetime': current_time
+    }
+    db.pool_state.insert_one(pool_state_data)
+    print("Pool state updated and saved in the pool_state collection.")
+
 #-----------------------------------------------------------------------------
 # Looking for "piscine" collection in the WaterBnB database
 collPool= 'piscine'
@@ -114,6 +144,15 @@ pools_collection = db.piscine
 
 #@app.route("/reserve_pool", methods=['POST'])
 def reserve_pool(pool_id, user_id):
+    app = Flask(__name__) #app = Flask(name)
+    app.secret_key = 'BAD_SECRET_KEY'
+    app.config['MQTT_BROKER_URL'] = "test.mosquitto.org"
+    app.config['MQTT_BROKER_PORT'] = 1883
+    app.config['MQTT_TLS_ENABLED'] = False
+    mqtt_client = Mqtt(app)
+    qos = 0
+    
+    
     # Check if the pool exists
     pool = pools_collection.find_one({'_id': pool_id})
     current_time = datetime.datetime.now()
@@ -153,14 +192,14 @@ def reserve_pool(pool_id, user_id):
             #return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
 
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
+        
+    update_pool_state(pool_id, user_id, is_occupied)
     # Publish the message to the user's topic    
     topic = "uca/iot/piscine/" + pool_id
-    
-    current_time = datetime.datetime.now()
     # Envoi du message MQTT
     topic = "uca/iot/piscine/P_22005205"
-    message = "AA"
-    mqtt_client.publish(topic, message)
+    mqtt_client.publish(topic, json.dumps(message).encode("utf-8"),
+                            qos=qos)
     print(f"Published message to topic {topic}: {message}")
     
     return jsonify({'message': 'okkk'}), 200
@@ -340,6 +379,11 @@ def handle_connect(client, userdata, flags, rc):
    else:
        print('Bad connection. Code:', rc)
 
+def load_json_schema(schema_file):
+    with open(schema_file, 'r') as file:
+        schema = json.load(file)
+    return schema
+schema = load_json_schema('schema.json')
 
 @mqtt_client.on_message()
 def handle_mqtt_message(client, userdata, msg):
@@ -364,9 +408,16 @@ def handle_mqtt_message(client, userdata, msg):
                 print(f"Failed to decode JSON: {e}")
                 return
 
+            try:
+                validate(instance=dic, schema=schema)
+            except ValidationError as e:
+                print(f"Invalid JSON data: {e}")
+                return
+            
             #print("\n Dictionary received = {}".format(dic))
 
             who = dic["info"]["ident"]
+            user_id = who[2:]  # Prend la sous-chaîne de who à partir du troisième caractère jusqu'à la fin
             pool = pools_collection.find_one({'_id': who})
             if pool:
                 print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
@@ -374,6 +425,7 @@ def handle_mqtt_message(client, userdata, msg):
                 light_status = dic["status"]["light"]
                 if light_status > 300 and pool.get('occupied', False):
                     pools_collection.update_one({'_id': who}, {'$set': {'occupied': False}})
+                    update_pool_state(who, user_id, False)
                     print(f"Updated pool {who}: set occupied to False due to light level {light_status}")
 
                     # Envoi du message MQTT
@@ -389,7 +441,16 @@ def handle_mqtt_message(client, userdata, msg):
                 else:
                     print(f"Pool {who} is not occupied or light level is below threshold, light = {light_status}")
             else:
-                print(f"No pool found with id {who}")
+                print(f"Pool {who} does not exist. Creating a new pool.")
+                pool_data = {
+                    '_id': who,
+                    'occupied': False,
+                    'id_user': user_id,
+                    'time': datetime.datetime.now()
+                }
+                pools_collection.insert_one(pool_data)
+                print(f"Pool {who} created.")
+                pool = pools_collection.find_one({'_id': who})
         except Exception as e:
           print("Erreur au niveau de : " + str(e))
 
