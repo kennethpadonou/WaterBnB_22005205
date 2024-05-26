@@ -27,13 +27,14 @@ Afin de s'assurer que le publish vers le topic de l'esp soit effectué, il faut 
 #### Indications
 
 - Pour réserver une piscine, placer votre doigt sur le capteur de lumière et cliquez sur réserver via la map du dashbord node-red !
-Les cas de figures pris en compte :
+
+  
+.Les cas de figures pris en compte :
 -  Si elle est verte alors la piscine est disponible à la location. C’est la couleur avant la demande
 d’ouverture.
 -  Si elle est jaune alors la piscine est désormais occupée (elle le reste tant que le capteur de lumière
 le dit)
 - Si elle est rouge alors l’accès est refusé. Elle reste dans cet état pendant 30 secondes puis revient
 à vert.
-
 
  
