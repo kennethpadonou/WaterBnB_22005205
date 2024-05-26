@@ -445,10 +445,10 @@ def publish_to_pool_topic(topic,occupied,color):
                             qos=qos)
     status = result[0]
     if status == 0:
-        print(f"Send `{message}` to topic `{topic}`")
+        print(f"Send `{color}` to topic `{topic}`")
     else:
         print(f"Failed to send message to topic {topic}")
-    print(f"Published message to topic {topic}: {message}")
+    print(f"Published message to topic {topic}: {color}")
 
 #%%%%%%%%%%%%%  main driver function
 if __name__ == '__main__':
