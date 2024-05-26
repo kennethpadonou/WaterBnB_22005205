@@ -367,7 +367,7 @@ def handle_mqtt_message(client, userdata, msg):
     )
     print("\n msg.topic = {}".format(msg.topic))
     print("\n topicname = {}".format(topicname))
-    
+    isvalide = False
     if msg.topic == topicname:
         try:
             decoded_message = str(msg.payload.decode("utf-8"))
@@ -384,12 +384,13 @@ def handle_mqtt_message(client, userdata, msg):
             try:
                 validate(instance=dic, schema=schema)
                 print("JSON correct")
+                isvalide = True
             except ValidationError as e:
                 print(f"Invalid JSON data: {e}")
-                return
+                #return
             
             #print("\n Dictionary received = {}".format(dic))
-
+            
             who = dic["info"]["ident"]
             temp = dic["status"]["temperature"]
             light = dic["status"]["light"]
@@ -397,7 +398,8 @@ def handle_mqtt_message(client, userdata, msg):
             pool = pools_collection.find_one({'_id': who})
             if pool:
                 print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
-                pools_collection.update_one({'_id': who}, {'$set': {'state': dic}})
+                #if isvalide :
+                pools_collection.update_one({'_id': who}, {'$set': {"state": { "payload": dic, "isvalide": isvalide}}})
                 
                 light_status = dic["status"]["light"]
                 if light_status > 300 and pool.get('occupied', False):
