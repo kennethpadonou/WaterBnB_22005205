@@ -391,10 +391,13 @@ def handle_mqtt_message(client, userdata, msg):
             #print("\n Dictionary received = {}".format(dic))
 
             who = dic["info"]["ident"]
+            temp = dic["status"]["temperature"]
+            light = dic["status"]["light"]
             user_id = who[2:]  # Prend la sous-chaîne de who à partir du troisième caractère jusqu'à la fin
             pool = pools_collection.find_one({'_id': who})
             if pool:
                 print(f"Current state of pool {who} in database: occupied = {pool.get('occupied', 'Not set')}")
+                pools_collection.update_one({'_id': who}, {'$set': {'state': dic}})
                 
                 light_status = dic["status"]["light"]
                 if light_status > 300 and pool.get('occupied', False):
