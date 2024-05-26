@@ -56,7 +56,10 @@
     "net": {
       "type": "object",
       "properties": {
-        "uptime": { "type": "string" },
+        "uptime": { "oneOf": [
+          { "type": "string" },
+          { "type": "number" }
+        ] },
         "ssid": { "type": "string" },
         "mac": { "type": "string" },
         "ip": { "type": "string", "format": "ipv4" }
