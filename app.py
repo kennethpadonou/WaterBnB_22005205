@@ -63,11 +63,7 @@ def publish(client):
             break
 
 
-def run():
-    client = connect_mqtt()
-    client.loop_start()
-    publish(client)
-    client.loop_stop()
+
 
 
 
@@ -276,7 +272,7 @@ def client():
 
 
 @app.route("/open", methods= ['GET', 'POST'])
-@mqtt_client.on_connect()
+#@mqtt_client.on_connect()
 def openthedoor():
     idu = request.args.get('idu') # idu : clientid of the service
     idswp = request.args.get('idswp')  #idswp : id of the swimming pool
@@ -343,7 +339,9 @@ app.config['MQTT_BROKER_URL'] =  "test.mosquitto.org"
 app.config['MQTT_BROKER_PORT'] = 1883
 app.config['MQTT_TLS_ENABLED'] = False  # If your broker supports TLS, set it True
 
+
 topicname = "uca/iot/piscine"
+
 mqtt_client = Mqtt(app)
 
 @mqtt_client.on_connect()
@@ -453,5 +451,4 @@ def publish_to_pool_topic(topic,occupied,color):
 #%%%%%%%%%%%%%  main driver function
 if __name__ == '__main__':
     app.run(debug=False) 
-    run()
     
