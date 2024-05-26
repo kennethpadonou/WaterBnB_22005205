@@ -168,7 +168,7 @@ def reserve_pool(pool_id, user_id):
             # Case where the pool is already occupied
             print(f"Pool {pool_id} is already occupied.")
             is_occupied = True
-            led_strip = "Rouge"
+            led_strip = "rouge"
             #return jsonify({'error': 'Pool already occupied'}), 400
         else:
             # Case where the user reserves the pool as it is not occupied
@@ -178,7 +178,7 @@ def reserve_pool(pool_id, user_id):
             updated_pool = pools_collection.find_one({'_id': pool_id})
             print(f"Pool {pool_id} state after update: occupied = {updated_pool['occupied']}")
             is_occupied = False
-            led_strip = "Jaune"
+            led_strip = "jaune"
             #return jsonify({'message': 'Pool reserved by user', 'pool_id': pool_id, 'time': current_time}), 200
 
         message = {'occupied': is_occupied, 'led_strip': led_strip, 'time': current_timeString}
